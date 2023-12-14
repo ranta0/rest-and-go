@@ -3,18 +3,18 @@ package api
 import (
     "github.com/go-chi/chi/v5"
 
-    "github.com/ranta0/rest-and-go/internal/domain/interfaces"
-    "github.com/ranta0/rest-and-go/internal/middlewares"
+    "github.com/ranta0/rest-and-go/internal/domain"
+    "github.com/ranta0/rest-and-go/internal/middleware"
 )
 
 type Resource struct {
     name        string
-    controller  interfaces.ControllerInterface
-    middleware  middlewares.MiddlewareInterface
+    controller  domain.ControllerInterface
+    middleware  middleware.MiddlewareInterface
     // ExtraRoutes []*chi.Router
 }
 
-func NewResource(name string, controller interfaces.ControllerInterface, middleware middlewares.MiddlewareInterface) *Resource {
+func NewResource(name string, controller domain.ControllerInterface, middleware middleware.MiddlewareInterface) *Resource {
     return &Resource{
 	name: name,
 	controller: controller,

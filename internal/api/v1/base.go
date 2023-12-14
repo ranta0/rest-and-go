@@ -4,8 +4,8 @@ import (
 	"github.com/ranta0/rest-and-go/internal/app"
 	"github.com/ranta0/rest-and-go/internal/domain/auth"
 	"github.com/ranta0/rest-and-go/internal/domain/user"
-	"github.com/ranta0/rest-and-go/internal/middlewares"
-	"github.com/ranta0/rest-and-go/internal/api/v1/routes"
+	"github.com/ranta0/rest-and-go/internal/middleware"
+	"github.com/ranta0/rest-and-go/internal/api/v1/route"
 )
 
 func InitAPI(app *app.App) {
@@ -22,11 +22,11 @@ func InitAPI(app *app.App) {
 	apiEndpoint := "/api/v1/"
 
 	// Middleware definition
-	logger := middlewares.NewLoggerMiddleware(app.LoggerAPI.GetLogger())
+	logger := middleware.NewLoggerMiddleware(app.LoggerAPI.GetLogger())
 	app.Router.Use(logger.Apply)
-	jwtMiddleware := middlewares.NewJWTMiddleware(tokenService)
+	jwtMiddleware := middleware.NewJWTMiddleware(tokenService)
 
 	// Routes
-	routes.BindAuth(app.Router, jwtController)
-	routes.BindUser(app.Router, apiEndpoint, userController, jwtMiddleware)
+	route.BindAuth(app.Router, apiEndpoint, jwtController)
+	route.BindUser(app.Router, apiEndpoint, userController, jwtMiddleware)
 }

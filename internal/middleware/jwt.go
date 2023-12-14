@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"net/http"
@@ -7,8 +7,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/ranta0/rest-and-go/internal/domain/auth"
-	httpErrors "github.com/ranta0/rest-and-go/internal/errors"
-	"github.com/ranta0/rest-and-go/internal/utils"
+	"github.com/ranta0/rest-and-go/internal/error"
+	"github.com/ranta0/rest-and-go/internal/response"
 )
 
 type JWTMiddleware struct {
@@ -26,7 +26,7 @@ func (m *JWTMiddleware) validateTokenMiddleware(next http.Handler) http.Handler 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if tokenString == "" {
-			utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrUnauthorized.Error())
+			response.Error(w, r, http.StatusUnauthorized, error.ErrUnauthorized.Error())
 			return
 		}
 
@@ -34,25 +34,25 @@ func (m *JWTMiddleware) validateTokenMiddleware(next http.Handler) http.Handler 
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 		token, err := m.tokenService.ValidateToken(tokenString)
 		if err != nil || !token.Valid {
-			utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenInvalid.Error())
+			response.Error(w, r, http.StatusUnauthorized, error.ErrTokenInvalid.Error())
 			return
 		}
 
 		if m.tokenService.IsTokenRevoked(tokenString) {
-			utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenRevoked.Error())
+			response.Error(w, r, http.StatusUnauthorized, error.ErrTokenRevoked.Error())
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenInvalid.Error())
+			response.Error(w, r, http.StatusUnauthorized, error.ErrTokenInvalid.Error())
 			return
 		}
 
 		// Check the token type
 		tokenType, ok := claims["token_type"].(string)
 		if !ok || tokenType != m.tokenService.Strings()["access"] {
-			utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenType.Error())
+			response.Error(w, r, http.StatusUnauthorized, error.ErrTokenType.Error())
 			return
 		}
 
