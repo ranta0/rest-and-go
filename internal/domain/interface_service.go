@@ -1,4 +1,4 @@
-package interfaces
+package domain
 
 type ServiceInterface interface {
 	GetAll() ([]ModelInterface, error)

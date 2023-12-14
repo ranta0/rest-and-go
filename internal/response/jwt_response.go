@@ -1,4 +1,4 @@
-package utils
+package response
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-type JWTResponse struct {
+type JWT struct {
 	Status         string `json:"status,omitempty"`
 	Message        string `json:"message"`
 	Type           string `json:"type"`
@@ -15,7 +15,7 @@ type JWTResponse struct {
 	RefreshToken   string `json:"refresh_token"`
 }
 
-func JWTJsonResponse(w http.ResponseWriter, r *http.Request, code int, response *JWTResponse) {
+func JsonJWT(w http.ResponseWriter, r *http.Request, code int, response *JWT) {
 	render.Status(r, code)
 	render.JSON(w, r, response)
 }

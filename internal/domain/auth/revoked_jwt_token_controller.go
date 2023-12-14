@@ -7,8 +7,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/ranta0/rest-and-go/internal/domain/user"
-	"github.com/ranta0/rest-and-go/internal/utils"
-	httpErrors "github.com/ranta0/rest-and-go/internal/errors"
+	"github.com/ranta0/rest-and-go/internal/error"
+	"github.com/ranta0/rest-and-go/internal/form"
+	"github.com/ranta0/rest-and-go/internal/response"
+	"github.com/ranta0/rest-and-go/internal/request"
 )
 
 type JWTController struct {
@@ -24,53 +26,47 @@ func NewJWTController(userService *user.UserService, tokenService *RevokedJWTTok
 }
 
 func (h *JWTController) Register(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		Username string `json:"username" form:"username" validate:"required"`
-		Password string `json:"password" form:"password" validate:"required"`
-	}
+	auth := &form.Auth{}
 
-	err := utils.HandlePayload(r, &request)
+	err := request.Handler(r, auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = utils.ValidatePayload(&request)
+	err = request.Validator(auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.userService.Register(request.Username, request.Password)
+	err = h.userService.Register(auth.Username, auth.Password)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusInternalServerError, err.Error())
+		response.Error(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	utils.SuccessJsonResponse(w, r, http.StatusCreated, nil)
+	response.OK(w, r, http.StatusCreated, nil)
 }
 
 func (c *JWTController) Login(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		Username string `json:"username" form:"username" validate:"required"`
-		Password string `json:"password" form:"password" validate:"required"`
-	}
+	auth := &form.Auth{}
 
-	err := utils.HandlePayload(r, &request)
+	err := request.Handler(r, auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = utils.ValidatePayload(&request)
+	err = request.Validator(auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	user, err := c.userService.Login(request.Username, request.Password)
+	user, err := c.userService.Login(auth.Username, auth.Password)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, httpErrors.ErrCredentials.Error())
+		response.Error(w, r, http.StatusBadRequest, error.ErrCredentials.Error())
 		return
 	}
 
@@ -86,7 +82,7 @@ func (c *JWTController) Login(w http.ResponseWriter, r *http.Request) {
 	claims["exp"] = expirationTime.Unix()
 	accessToken, err := c.tokenService.GenerateToken(claims)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusInternalServerError, httpErrors.ErrTokenCreate.Error())
+		response.Error(w, r, http.StatusInternalServerError, error.ErrTokenCreate.Error())
 		return
 	}
 
@@ -94,11 +90,11 @@ func (c *JWTController) Login(w http.ResponseWriter, r *http.Request) {
 	claims["exp"] = expirationTimeRefresh.Unix()
 	refreshToken, err := c.tokenService.GenerateToken(claims)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusInternalServerError, httpErrors.ErrTokenCreate.Error())
+		response.Error(w, r, http.StatusInternalServerError, error.ErrTokenCreate.Error())
 		return
 	}
 
-	utils.JWTJsonResponse(w, r, http.StatusOK, &utils.JWTResponse{
+	response.JsonJWT(w, r, http.StatusOK, &response.JWT{
 		Status:         "success",
 		Message:        "user athenticated successfully",
 		Type:           "bearer",
@@ -109,49 +105,47 @@ func (c *JWTController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *JWTController) Refresh(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		RefreshToken string `json:"refresh_token" form:"refresh_token" validate:"required"`
-	}
+	auth := &form.AuthRefresh{}
 
-	err := utils.HandlePayload(r, &request)
+	err := request.Handler(r, auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = utils.ValidatePayload(&request)
+	err = request.Validator(auth)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusBadRequest, err.Error())
+		response.Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	token, err := c.tokenService.ValidateToken(request.RefreshToken)
+	token, err := c.tokenService.ValidateToken(auth.RefreshToken)
 	if err != nil || !token.Valid {
-		utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenInvalid.Error())
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenInvalid.Error())
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenInvalid.Error())
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenInvalid.Error())
 		return
 	}
 
 	// Check the token type
 	if claims["token_type"] != c.tokenService.strings["refresh"] {
-		utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenType.Error())
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenType.Error())
 		return
 	}
 
-	if c.tokenService.IsTokenRevoked(request.RefreshToken) {
-		utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenRevoked.Error())
+	if c.tokenService.IsTokenRevoked(auth.RefreshToken) {
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenRevoked.Error())
 		return
 	}
 
 	// Revoke previous token
-	err = c.tokenService.RevokeToken(request.RefreshToken)
+	err = c.tokenService.RevokeToken(auth.RefreshToken)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusUnauthorized, httpErrors.ErrTokenRevokedFailure.Error())
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenRevokedFailure.Error())
 		return
 	}
 
@@ -164,7 +158,7 @@ func (c *JWTController) Refresh(w http.ResponseWriter, r *http.Request) {
 	claims["exp"] = expirationTime.Unix()
 	newAccessToken, err := c.tokenService.GenerateToken(claims)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusInternalServerError, httpErrors.ErrTokenCreate.Error())
+		response.Error(w, r, http.StatusInternalServerError, error.ErrTokenCreate.Error())
 		return
 	}
 
@@ -173,11 +167,11 @@ func (c *JWTController) Refresh(w http.ResponseWriter, r *http.Request) {
 	claims["exp"] = expirationTimeRefresh.Unix()
 	newRefreshToken, err := c.tokenService.GenerateToken(claims)
 	if err != nil {
-		utils.ErrorJsonResponse(w, r, http.StatusInternalServerError, httpErrors.ErrTokenCreate.Error())
+		response.Error(w, r, http.StatusInternalServerError, error.ErrTokenCreate.Error())
 		return
 	}
 
-	utils.JWTJsonResponse(w, r, http.StatusOK, &utils.JWTResponse{
+	response.JsonJWT(w, r, http.StatusOK, &response.JWT{
 		Status:         "success",
 		Message:        "token refreshed successfully",
 		Type:           "bearer",

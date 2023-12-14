@@ -1,4 +1,4 @@
-package interfaces
+package domain
 
 type RepositoryInterface interface {
 	Create(user *ModelInterface) error
