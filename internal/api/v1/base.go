@@ -19,7 +19,7 @@ func InitAPI(app *app.App) {
 	jwtController := auth.NewJWTController(userService, tokenService)
 
 	// Api specs
-	apiEndpoint := "/api/v1/"
+	apiEndpoint := "/api/v1"
 
 	// Middleware definition
 	logger := middleware.NewLoggerMiddleware(app.LoggerAPI.GetLogger())
@@ -27,6 +27,6 @@ func InitAPI(app *app.App) {
 	jwtMiddleware := middleware.NewJWTMiddleware(tokenService)
 
 	// Routes
-	route.BindAuth(app.Router, apiEndpoint, jwtController)
+	route.BindAuth(app.Router, apiEndpoint, jwtController, jwtMiddleware)
 	route.BindUser(app.Router, apiEndpoint, userController, jwtMiddleware)
 }

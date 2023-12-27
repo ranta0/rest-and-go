@@ -68,7 +68,7 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stub := response.NewOK(newUser, nil)
-	response.OK(w, r, http.StatusOK, stub)
+	response.OK(w, r, http.StatusCreated, stub)
 }
 
 // PATCH /api/v1/users/{id} endpoint

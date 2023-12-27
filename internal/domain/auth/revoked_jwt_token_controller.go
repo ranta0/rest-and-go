@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -9,8 +10,8 @@ import (
 	"github.com/ranta0/rest-and-go/internal/domain/user"
 	"github.com/ranta0/rest-and-go/internal/error"
 	"github.com/ranta0/rest-and-go/internal/form"
-	"github.com/ranta0/rest-and-go/internal/response"
 	"github.com/ranta0/rest-and-go/internal/request"
+	"github.com/ranta0/rest-and-go/internal/response"
 )
 
 type JWTController struct {
@@ -25,7 +26,7 @@ func NewJWTController(userService *user.UserService, tokenService *RevokedJWTTok
 	}
 }
 
-func (h *JWTController) Register(w http.ResponseWriter, r *http.Request) {
+func (c *JWTController) Register(w http.ResponseWriter, r *http.Request) {
 	auth := &form.Auth{}
 
 	err := request.Handler(r, auth)
@@ -40,13 +41,14 @@ func (h *JWTController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userService.Register(auth.Username, auth.Password)
+	err = c.userService.Register(auth.Username, auth.Password)
 	if err != nil {
 		response.Error(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.OK(w, r, http.StatusCreated, nil)
+	stub := response.NewOK(nil, nil)
+	response.OK(w, r, http.StatusCreated, stub)
 }
 
 func (c *JWTController) Login(w http.ResponseWriter, r *http.Request) {
@@ -179,4 +181,28 @@ func (c *JWTController) Refresh(w http.ResponseWriter, r *http.Request) {
 		ExpirationTime: expirationTime.Format(time.RFC3339),
 		RefreshToken:   newRefreshToken,
 	})
+}
+
+func (c *JWTController) Logout(w http.ResponseWriter, r *http.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		response.Error(w, r, http.StatusUnauthorized, error.ErrUnauthorized.Error())
+		return
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+	token, err := c.tokenService.ValidateToken(tokenString)
+	if err != nil || !token.Valid {
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenInvalid.Error())
+		return
+	}
+
+	err = c.tokenService.RevokeToken(tokenString)
+	if err != nil {
+		response.Error(w, r, http.StatusUnauthorized, error.ErrTokenRevokedFailure.Error())
+		return
+	}
+
+	stub := response.NewOK(nil, nil)
+	response.OK(w, r, http.StatusOK, stub)
 }

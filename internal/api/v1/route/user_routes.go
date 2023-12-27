@@ -9,6 +9,6 @@ import (
 )
 
 func BindUser(router *chi.Mux, apiVersion string, controller *user.UserController, middleware middleware.MiddlewareInterface) {
-	userAPI := api.NewResource("users", controller, middleware)
+	userAPI := api.NewResource("/users", controller, middleware)
 	userAPI.BindRoutes(router, apiVersion);
 }

@@ -9,6 +9,12 @@ import (
 )
 
 func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
+	if stub.Data == nil {
+		render.Status(r, code)
+		render.JSON(w, r, stub)
+		return
+	}
+
 	if isArray(stub.Data) {
 		stub.AddPaginationLinks(getFullURL(r, ""))
 	} else {
@@ -18,7 +24,7 @@ func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
 		if exist {
 			param = value.(string)
 		}
-		stub.AddSelfLink(getFullURL(r, param))
+		stub.AddSelfLink(getFullURL(r, "/" + param))
 	}
 
 	render.Status(r, code)
