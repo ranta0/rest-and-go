@@ -6,18 +6,16 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/ranta0/rest-and-go/internal/config"
-	"github.com/ranta0/rest-and-go/internal/domain/auth"
-	"github.com/ranta0/rest-and-go/internal/domain/user"
-	"github.com/ranta0/rest-and-go/internal/logging"
+	"github.com/ranta0/rest-and-go/config"
+	"github.com/ranta0/rest-and-go/domain/auth"
+	"github.com/ranta0/rest-and-go/domain/user"
+	"github.com/ranta0/rest-and-go/logging"
 )
-
 
 type App struct {
 	Config    *config.Config
 	DB        *gorm.DB
 	Router    *chi.Mux
-
 	Logger    *logging.LoggerFile
 	LoggerAPI *logging.LoggerFile
 }
@@ -62,7 +60,15 @@ func initDB(cfg *config.Config, logger *logging.LoggerFile) (*gorm.DB, error) {
 	}
 
 	// Auto Migrate the schema
-	db.AutoMigrate(&user.User{})
-	db.AutoMigrate(&auth.RevokedJWTToken{})
+	err = db.AutoMigrate(&user.User{})
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.AutoMigrate(&auth.RevokedJWTToken{})
+	if err != nil {
+		return nil, err
+	}
+
 	return db, nil
 }

@@ -6,9 +6,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/ranta0/rest-and-go/internal/domain/auth"
-	"github.com/ranta0/rest-and-go/internal/error"
-	"github.com/ranta0/rest-and-go/internal/response"
+	"github.com/ranta0/rest-and-go/domain/auth"
+	"github.com/ranta0/rest-and-go/error"
+	"github.com/ranta0/rest-and-go/response"
 )
 
 type JWTMiddleware struct {

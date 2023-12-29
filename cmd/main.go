@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/ranta0/rest-and-go/internal/api/v1"
-	"github.com/ranta0/rest-and-go/internal/app"
-	"github.com/ranta0/rest-and-go/internal/config"
+	"github.com/ranta0/rest-and-go/api/v1"
+	"github.com/ranta0/rest-and-go/app"
+	"github.com/ranta0/rest-and-go/config"
 )
 
 func main() {

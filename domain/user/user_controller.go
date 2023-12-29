@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/ranta0/rest-and-go/internal/request"
-	"github.com/ranta0/rest-and-go/internal/response"
+	"github.com/ranta0/rest-and-go/request"
+	"github.com/ranta0/rest-and-go/response"
 )
 
 type UserController struct {

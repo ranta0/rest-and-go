@@ -3,7 +3,7 @@ package response
 import (
 	"fmt"
 
-	"github.com/ranta0/rest-and-go/internal/pagination"
+	"github.com/ranta0/rest-and-go/pagination"
 )
 
 type JSONStub struct {
@@ -12,15 +12,6 @@ type JSONStub struct {
 	Message string            `json:"message,omitempty"`
 	Data    interface{}       `json:"data,omitempty"`
 	Links   map[string]string `json:"links,omitempty"`
-}
-
-func newJSONStub(v interface{}, status string, message string) *JSONStub {
-	return &JSONStub{
-		Data:    v,
-		Status:  status,
-		Message: message,
-		Links:   make(map[string]string),
-	}
 }
 
 func (j *JSONStub) addLink(rel string, href string) {
@@ -33,8 +24,8 @@ func (j *JSONStub) AddPaginationLinks(href string) {
 	}
 
 	var prevHref string
-	if j.Page - 1 > 0 {
-		prevHref = href+fmt.Sprintf("?page=%d", (j.Page-1))
+	if j.Page-1 > 0 {
+		prevHref = href + fmt.Sprintf("?page=%d", (j.Page-1))
 	}
 	j.addLink("prev", prevHref)
 	j.addLink("self", href+fmt.Sprintf("?page=%d", (j.Page)))

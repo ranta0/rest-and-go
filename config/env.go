@@ -57,19 +57,18 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		Debug: debug,
-		JWTSigningKey: os.Getenv("JWT_SIGNING_KEY"),
-		JWTExpiration: tokenExpiration,
+		Debug:                debug,
+		JWTSigningKey:        os.Getenv("JWT_SIGNING_KEY"),
+		JWTExpiration:        tokenExpiration,
 		JWTExpirationRefresh: tokenExpirationRefresh,
-		ServerPort: serverPort,
-		ShutdownTimeout: shutdownTimeout,
-		DSN: os.Getenv("DSN"),
-		LogDir: os.Getenv("LOG_DIR"),
-		LogAPPFilename: os.Getenv("LOG_APP_FILENAME"),
-		LogAPIFilename: os.Getenv("LOG_API_FILENAME"),
+		ServerPort:           serverPort,
+		ShutdownTimeout:      shutdownTimeout,
+		DSN:                  os.Getenv("DSN"),
+		LogDir:               os.Getenv("LOG_DIR"),
+		LogAPPFilename:       os.Getenv("LOG_APP_FILENAME"),
+		LogAPIFilename:       os.Getenv("LOG_API_FILENAME"),
 	}, nil
 }
-
 
 // Default false
 func parseBool(key string) (bool, error) {

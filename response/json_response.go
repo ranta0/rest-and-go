@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/go-chi/render"
-	"github.com/ranta0/rest-and-go/internal/pagination"
+	"github.com/ranta0/rest-and-go/pagination"
 )
 
 func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
@@ -24,7 +24,7 @@ func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
 		if exist {
 			param = value.(string)
 		}
-		stub.AddSelfLink(getFullURL(r, "/" + param))
+		stub.AddSelfLink(getFullURL(r, "/"+param))
 	}
 
 	render.Status(r, code)

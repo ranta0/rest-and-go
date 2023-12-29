@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/ranta0/rest-and-go/internal/app"
-	"github.com/ranta0/rest-and-go/internal/domain/auth"
-	"github.com/ranta0/rest-and-go/internal/domain/user"
-	"github.com/ranta0/rest-and-go/internal/middleware"
-	"github.com/ranta0/rest-and-go/internal/api/v1/route"
+	"github.com/ranta0/rest-and-go/api/v1/route"
+	"github.com/ranta0/rest-and-go/app"
+	"github.com/ranta0/rest-and-go/domain/auth"
+	"github.com/ranta0/rest-and-go/domain/user"
+	"github.com/ranta0/rest-and-go/middleware"
 )
 
 func InitAPI(app *app.App) {

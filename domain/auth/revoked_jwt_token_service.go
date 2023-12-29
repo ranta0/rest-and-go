@@ -5,7 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/ranta0/rest-and-go/internal/config"
+	"github.com/ranta0/rest-and-go/config"
 )
 
 type RevokedJWTTokenService struct {
@@ -18,9 +18,9 @@ type RevokedJWTTokenService struct {
 
 func NewRevokedJWTTokenService(tokenRepo *RevokedJWTTokenRepository, cfg *config.Config) *RevokedJWTTokenService {
 	return &RevokedJWTTokenService{
-		tokenRepo:  tokenRepo,
-		signingKey: []byte(cfg.JWTSigningKey),
-		expirationTime: cfg.JWTExpiration,
+		tokenRepo:             tokenRepo,
+		signingKey:            []byte(cfg.JWTSigningKey),
+		expirationTime:        cfg.JWTExpiration,
 		expirationTimeRefresh: cfg.JWTExpirationRefresh,
 		strings: map[string]string{
 			"access":  "access_token_type",

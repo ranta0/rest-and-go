@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strconv"
 
-	httpError "github.com/ranta0/rest-and-go/internal/error"
+	httpError "github.com/ranta0/rest-and-go/error"
 )
 
 // Handles all kinds of content types

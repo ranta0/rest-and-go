@@ -3,8 +3,8 @@ package route
 import (
 	"github.com/go-chi/chi/v5"
 
-	"github.com/ranta0/rest-and-go/internal/domain/auth"
-	"github.com/ranta0/rest-and-go/internal/middleware"
+	"github.com/ranta0/rest-and-go/domain/auth"
+	"github.com/ranta0/rest-and-go/middleware"
 )
 
 func BindAuth(router *chi.Mux, apiVersion string, controller *auth.JWTController, middleware middleware.MiddlewareInterface) {

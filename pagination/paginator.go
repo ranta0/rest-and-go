@@ -3,7 +3,7 @@ package pagination
 import (
 	"strconv"
 
-	"github.com/ranta0/rest-and-go/internal/form"
+	"github.com/ranta0/rest-and-go/form"
 )
 
 var (
@@ -52,7 +52,7 @@ func (p *Paginator) Limit() int {
 	return p.PerPage
 }
 
-func NewFromRequest(form *form.Pagination , count int) *Paginator {
+func NewFromRequest(form *form.Pagination, count int) *Paginator {
 	page := parseInt(form.Page, 1)
 	perPage := parseInt(form.PerPage, defaultPageSize)
 	return NewPaginator(page, perPage, count)

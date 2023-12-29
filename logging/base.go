@@ -35,7 +35,7 @@ func NewLoggerFile(dir string, filename string) (*LoggerFile, error) {
 
 	loggerFile := &LoggerFile{
 		logger: logger,
-		file: file,
+		file:   file,
 	}
 
 	loggerFile.SetProd()
@@ -68,7 +68,10 @@ func (l *LoggerFile) Trace(ctx context.Context, begin time.Time, fc func() (stri
 func (l *LoggerFile) writeLogFile(levelType string, logLevel logger.LogLevel, msg string, data ...interface{}) {
 	if logLevel >= l.logLevel {
 		logMessage := fmt.Sprintf("[%s] %s %v\n", levelType, msg, data)
-		l.file.WriteString(logMessage)
+		_, err := l.file.WriteString(logMessage)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
 	}
 }
 

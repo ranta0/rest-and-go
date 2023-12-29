@@ -7,11 +7,11 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/ranta0/rest-and-go/internal/domain/user"
-	"github.com/ranta0/rest-and-go/internal/error"
-	"github.com/ranta0/rest-and-go/internal/form"
-	"github.com/ranta0/rest-and-go/internal/request"
-	"github.com/ranta0/rest-and-go/internal/response"
+	"github.com/ranta0/rest-and-go/domain/user"
+	"github.com/ranta0/rest-and-go/error"
+	"github.com/ranta0/rest-and-go/form"
+	"github.com/ranta0/rest-and-go/request"
+	"github.com/ranta0/rest-and-go/response"
 )
 
 type JWTController struct {
@@ -153,7 +153,6 @@ func (c *JWTController) Refresh(w http.ResponseWriter, r *http.Request) {
 
 	expirationTime := time.Now().Add(c.tokenService.expirationTime)
 	expirationTimeRefresh := time.Now().Add(time.Hour * c.tokenService.expirationTimeRefresh)
-
 
 	// Generate a new access token
 	claims["token_type"] = c.tokenService.strings["access"]
