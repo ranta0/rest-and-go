@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/ranta0/rest-and-go/domain/user"
 	"github.com/ranta0/rest-and-go/error"
