@@ -38,11 +38,24 @@ func (ur *UserRepository) Delete(id string) error {
 }
 
 // GetAll retrieves all users from the database
-func (ur *UserRepository) GetAll() ([]User, error) {
+func (ur *UserRepository) GetAll(limit, offset int) ([]User, error) {
 	var users []User
-	err := ur.db.Find(&users).Error
+	err := ur.db.
+		Model(&User{}).
+		Limit(limit).
+		Offset(offset).
+		Find(&users).
+		Error
 
 	return users, err
+}
+
+// CountAll get the coutn of all values from the database
+func (ur *UserRepository) CountAll() (int, error) {
+	var count int64
+
+	err := ur.db.Model(&User{}).Count(&count).Error
+	return int(count), err
 }
 
 func (r *UserRepository) GetByUsername(username string) (*User, error) {

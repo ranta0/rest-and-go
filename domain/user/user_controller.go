@@ -1,10 +1,12 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/ranta0/rest-and-go/form"
 	"github.com/ranta0/rest-and-go/request"
 	"github.com/ranta0/rest-and-go/response"
 )
@@ -21,14 +23,35 @@ func NewUserController(userService *UserService) *UserController {
 
 // GET /api/v1/users endpoint
 func (c *UserController) GetAll(w http.ResponseWriter, r *http.Request) {
-	// TODO: create a paginator pagination.NewPaginator(2, 2, 3)
-	users, err := c.userService.GetAll()
+	pagination := &form.Pagination{}
+
+	err := request.Handler(r, pagination)
+	if err != nil {
+		response.Error(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = request.Validator(pagination)
+	if err != nil {
+		response.Error(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	count, err := c.userService.CountAll()
+	if err != nil {
+		response.Error(w, r, http.StatusInternalServerError, err.Error())
+		return
+	}
+	paginator := form.NewPaginatorFromRequest(pagination, count)
+	fmt.Printf("%v", paginator)
+
+	users, err := c.userService.GetAll(paginator.Limit(), paginator.Offset())
 	if err != nil {
 		response.Error(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	stub := response.NewOK(users, nil)
+	stub := response.NewOK(users, paginator)
 	response.OK(w, r, http.StatusOK, stub)
 }
 

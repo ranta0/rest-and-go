@@ -12,6 +12,15 @@ import (
 
 // Handles all kinds of content types
 func Handler(r *http.Request, v interface{}) error {
+	if r.Method == http.MethodGet {
+		err := parseQuery(r, v)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	contentType := r.Header.Get("Content-Type")
 
 	switch contentType {
@@ -84,6 +93,44 @@ func parseFormEncode(r *http.Request, v interface{}) error {
 			fieldValue.SetInt(int64(intValue))
 		default:
 			return fmt.Errorf("unsupported field type: %s", fieldValue.Kind())
+		}
+	}
+
+	return nil
+}
+
+// Handles query and puts it into a form
+func parseQuery(r *http.Request, v interface{}) error {
+	queryValues := r.URL.Query()
+
+	structValue := reflect.ValueOf(v).Elem()
+	structType := structValue.Type()
+
+	for i := 0; i < structValue.NumField(); i++ {
+		field := structType.Field(i)
+		fieldValue := structValue.Field(i)
+
+		// Get the query parameter name from the struct field tag
+		paramName := field.Tag.Get("json")
+		if paramName == "" {
+			paramName = field.Name
+		}
+
+		paramValue := queryValues.Get(paramName)
+
+		switch fieldValue.Kind() {
+		case reflect.String:
+			fieldValue.SetString(paramValue)
+		case reflect.Int:
+			if paramValue != "" {
+				intValue, err := strconv.Atoi(paramValue)
+				if err != nil {
+					return fmt.Errorf("query string, could not convert %s to int: %v", paramName, err)
+				}
+				fieldValue.SetInt(int64(intValue))
+			}
+		default:
+			return fmt.Errorf("query string, unsupported field type: %s", fieldValue.Kind())
 		}
 	}
 
