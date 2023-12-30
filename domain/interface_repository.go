@@ -9,5 +9,7 @@ type RepositoryInterface interface {
 
 	Delete(id string) error
 
-	GetAll() ([]ModelInterface, error)
+	GetAll(limit, offset int) ([]ModelInterface, error)
+
+	CountAll() (int, error)
 }

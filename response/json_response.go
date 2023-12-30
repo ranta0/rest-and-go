@@ -3,6 +3,7 @@ package response
 import (
 	"net/http"
 	"reflect"
+	"strings"
 
 	"github.com/go-chi/render"
 	"github.com/ranta0/rest-and-go/pagination"
@@ -15,8 +16,10 @@ func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
 		return
 	}
 
+	url := getFullURL(r)
+
 	if isArray(stub.Data) {
-		stub.AddPaginationLinks(getFullURL(r, ""))
+		stub.AddPaginationLinks(url)
 	} else {
 		// add id resource to the url
 		var param string
@@ -24,7 +27,12 @@ func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
 		if exist {
 			param = value.(string)
 		}
-		stub.AddSelfLink(getFullURL(r, "/"+param))
+
+		selfUrl := url
+		if !strings.Contains(url, param) {
+			selfUrl += param
+		}
+		stub.AddSelfLink(selfUrl)
 	}
 
 	render.Status(r, code)
@@ -34,19 +42,6 @@ func OK(w http.ResponseWriter, r *http.Request, code int, stub *JSONStub) {
 func Error(w http.ResponseWriter, r *http.Request, code int, message string) {
 	render.Status(r, code)
 	render.JSON(w, r, NewError(message))
-}
-
-func getFullURL(r *http.Request, param string) string {
-	scheme := r.URL.Scheme
-	if scheme == "" {
-		scheme = "http"
-	}
-
-	fullURL := scheme + "://" + r.Host + r.URL.String()
-	if param != "" {
-		fullURL += param
-	}
-	return fullURL
 }
 
 func NewOK(v interface{}, pages *pagination.Paginator) *JSONStub {
@@ -63,6 +58,18 @@ func NewError(message string) *JSONStub {
 		Message: message,
 		Status:  "error",
 	}
+}
+
+func getFullURL(r *http.Request) string {
+	r.URL.RawQuery = ""
+
+	scheme := r.URL.Scheme
+	if scheme == "" {
+		scheme = "http"
+	}
+
+	fullURL := scheme + "://" + r.Host + r.URL.String()
+	return fullURL
 }
 
 func isArray(data interface{}) bool {

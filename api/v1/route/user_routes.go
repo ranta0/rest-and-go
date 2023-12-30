@@ -10,5 +10,8 @@ import (
 
 func BindUser(router *chi.Mux, apiVersion string, controller *user.UserController, middleware middleware.MiddlewareInterface) {
 	userAPI := api.NewResource("/users", controller, middleware)
-	userAPI.BindRoutes(router, apiVersion)
+	userAPI.BindRoutes(router, apiVersion, func(r chi.Router) {
+		r.Patch("/{id}/roles/{role_id}", controller.SetRole)
+		r.Delete("/{id}/roles/{role_id}", controller.DeleteRole)
+	})
 }

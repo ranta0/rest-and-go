@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/ranta0/rest-and-go/domain/role"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,10 @@ func (ur *UserRepository) Create(user *User) error {
 // GetByID retrieves a user from the database by ID.
 func (ur *UserRepository) GetByID(id string) (*User, error) {
 	var user User
-	err := ur.db.Where("public_id = ?", id).First(&user).Error
+	query := ur.db.Where("public_id = ?", id)
+	// TODO: toggle relations based on query string
+	query = query.Preload("Roles")
+	err := query.First(&user).Error
 
 	return &user, err
 }
@@ -38,11 +42,32 @@ func (ur *UserRepository) Delete(id string) error {
 }
 
 // GetAll retrieves all users from the database
-func (ur *UserRepository) GetAll() ([]User, error) {
+func (ur *UserRepository) GetAll(limit, offset int) ([]User, error) {
 	var users []User
-	err := ur.db.Find(&users).Error
+	query := ur.db.Model(&User{}).Limit(limit).Offset(offset)
+	// TODO: toggle relations based on query string
+	query = query.Preload("Roles")
+	err := query.Find(&users).Error
 
 	return users, err
+}
+
+// AddRole add association between user and a role
+func (ur *UserRepository) SetRole(user *User, role *role.Role) error {
+	return ur.db.Model(user).Association("Roles").Append(role)
+}
+
+// DeleteRole remove association between user and a role
+func (ur *UserRepository) DeleteRole(user *User, role *role.Role) error {
+	return ur.db.Model(user).Association("Roles").Delete(role)
+}
+
+// CountAll get the coutn of all values from the database
+func (ur *UserRepository) CountAll() (int, error) {
+	var count int64
+
+	err := ur.db.Model(&User{}).Count(&count).Error
+	return int(count), err
 }
 
 func (r *UserRepository) GetByUsername(username string) (*User, error) {

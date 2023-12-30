@@ -1,14 +1,8 @@
 package pagination
 
-import (
-	"strconv"
-
-	"github.com/ranta0/rest-and-go/form"
-)
-
 var (
-	defaultPageSize = 10
-	maxPageSize     = 100
+	DefaultPageSize = 10
+	MaxPageSize     = 100
 )
 
 type Paginator struct {
@@ -20,10 +14,10 @@ type Paginator struct {
 
 func NewPaginator(page, perPage, totalItems int) *Paginator {
 	if perPage <= 0 {
-		perPage = defaultPageSize
+		perPage = DefaultPageSize
 	}
-	if perPage > maxPageSize {
-		perPage = maxPageSize
+	if perPage > MaxPageSize {
+		perPage = MaxPageSize
 	}
 	pageCount := -1
 	if totalItems >= 0 {
@@ -50,17 +44,4 @@ func (p *Paginator) Offset() int {
 
 func (p *Paginator) Limit() int {
 	return p.PerPage
-}
-
-func NewFromRequest(form *form.Pagination, count int) *Paginator {
-	page := parseInt(form.Page, 1)
-	perPage := parseInt(form.PerPage, defaultPageSize)
-	return NewPaginator(page, perPage, count)
-}
-
-func parseInt(value string, defaultValue int) int {
-	if result, err := strconv.Atoi(value); err == nil {
-		return result
-	}
-	return defaultValue
 }

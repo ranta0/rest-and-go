@@ -14,8 +14,12 @@ func NewUserService(userRepo *UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) GetAll() ([]User, error) {
-	return s.userRepo.GetAll()
+func (s *UserService) GetAll(limit, offset int) ([]User, error) {
+	return s.userRepo.GetAll(limit, offset)
+}
+
+func (s *UserService) CountAll() (int, error) {
+	return s.userRepo.CountAll()
 }
 
 func (s *UserService) GetByID(id string) (*User, error) {

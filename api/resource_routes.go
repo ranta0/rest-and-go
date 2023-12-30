@@ -11,7 +11,6 @@ type Resource struct {
 	name       string
 	controller domain.ControllerInterface
 	middleware middleware.MiddlewareInterface
-	// ExtraRoutes []*chi.Router
 }
 
 func NewResource(name string, controller domain.ControllerInterface, middleware middleware.MiddlewareInterface) *Resource {
@@ -19,13 +18,12 @@ func NewResource(name string, controller domain.ControllerInterface, middleware 
 		name:       name,
 		controller: controller,
 		middleware: middleware,
-		// ExtraRoutes: routes,
 	}
 }
 
-// This can be used to simply the api building process
+// This can be used to simplify the api building process
 // - apiVersion must be in the form of "/api/v<number>/"
-func (re *Resource) BindRoutes(router *chi.Mux, apiVersion string) {
+func (re *Resource) BindRoutes(router *chi.Mux, apiVersion string, extraRoutes func(r chi.Router)) {
 	router.Route(apiVersion+re.name, func(r chi.Router) {
 		r.Use(re.middleware.Apply)
 
@@ -34,6 +32,9 @@ func (re *Resource) BindRoutes(router *chi.Mux, apiVersion string) {
 		r.Get("/{id}", re.controller.GetByID)
 		r.Patch("/{id}", re.controller.Update)
 		r.Delete("/{id}", re.controller.Delete)
-		// TODO: ExtraRoutes
+
+		if extraRoutes != nil {
+			extraRoutes(r)
+		}
 	})
 }

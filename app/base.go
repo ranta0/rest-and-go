@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/ranta0/rest-and-go/config"
 	"github.com/ranta0/rest-and-go/domain/auth"
+	"github.com/ranta0/rest-and-go/domain/role"
 	"github.com/ranta0/rest-and-go/domain/user"
 	"github.com/ranta0/rest-and-go/logging"
 )
@@ -60,12 +61,11 @@ func initDB(cfg *config.Config, logger *logging.LoggerFile) (*gorm.DB, error) {
 	}
 
 	// Auto Migrate the schema
-	err = db.AutoMigrate(&user.User{})
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.AutoMigrate(&auth.RevokedJWTToken{})
+	err = db.AutoMigrate(
+		&role.Role{},
+		&user.User{},
+		&auth.RevokedJWTToken{},
+	)
 	if err != nil {
 		return nil, err
 	}

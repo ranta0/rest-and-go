@@ -1,7 +1,7 @@
 package domain
 
 type ServiceInterface interface {
-	GetAll() ([]ModelInterface, error)
+	GetAll(limit, offset int) ([]ModelInterface, error)
 
 	GetByID(id string) (*ModelInterface, error)
 
@@ -10,4 +10,6 @@ type ServiceInterface interface {
 	Update(id string, user *ModelInterface) error
 
 	Delete(id string) error
+
+	CountAll() (int, error)
 }
